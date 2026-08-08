@@ -52,9 +52,9 @@ tar -xf "$DOWNLOADS/zsh.tar.xz" -C "$BUILD_ROOT"
 tar -xf "$DOWNLOADS/ncurses.tar.gz" -C "$BUILD_ROOT"
 
 export CC
-export CPPFLAGS="-isysroot $SDKROOT"
+export CPPFLAGS="-isysroot $SDKROOT -I$SDKROOT/usr/include"
 export CFLAGS="-O2 -arch $EXPECTED_ARCH -isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET"
-export LDFLAGS="-arch $EXPECTED_ARCH -isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET"
+export LDFLAGS="-arch $EXPECTED_ARCH -isysroot $SDKROOT -L$SDKROOT/usr/lib -isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET"
 
 (
   cd "$ZSH_SRC"
@@ -62,7 +62,7 @@ export LDFLAGS="-arch $EXPECTED_ARCH -isysroot $SDKROOT -mmacosx-version-min=$MA
     --prefix="$BUILD_ROOT/install" \
     --disable-dynamic \
     --disable-dynamic-nss \
-    --with-term-lib="ncurses curses"
+    --with-term-lib="ncursesw tinfo termcap ncurses curses"
   make -j"$(jobs_count)"
 )
 
@@ -75,4 +75,3 @@ install -m 0644 "$NCURSES_SRC/COPYING" "$STAGE/LICENSE.ncurses"
 write_metadata "$STAGE/BUILD-METADATA.json" "$TARGET" "$CC"
 
 printf 'built %s at %s\n' "$TARGET" "$STAGE/bin/zsh"
-
