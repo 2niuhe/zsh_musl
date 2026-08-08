@@ -53,6 +53,7 @@ tar -xf "$DOWNLOADS/ncurses.tar.gz" -C "$BUILD_ROOT"
 
 export CC
 export CPPFLAGS="-isysroot $SDKROOT -I$SDKROOT/usr/include"
+export CPP="$CC -E $CPPFLAGS"
 export CFLAGS="-O2 -arch $EXPECTED_ARCH -isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET"
 export LDFLAGS="-arch $EXPECTED_ARCH -isysroot $SDKROOT -L$SDKROOT/usr/lib -isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET"
 
