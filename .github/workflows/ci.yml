@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-verify:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: linux-amd64-musl
+            runner: ubuntu-24.04
+          - target: darwin-amd64
+            runner: macos-13
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Build
+        env:
+          BUILD_COMMIT: ${{ github.sha }}
+        run: |
+          if [[ "${{ matrix.target }}" == linux-* ]]; then
+            ./scripts/build-linux.sh --target "${{ matrix.target }}"
+          else
+            ./scripts/build-macos.sh --target "${{ matrix.target }}"
+          fi
+      - name: Verify binary and runtime behavior
+        run: ./scripts/verify.sh --target "${{ matrix.target }}"
+      - name: Package and verify archive
+        run: |
+          ./scripts/package.sh --target "${{ matrix.target }}"
+          archive="dist/zsh-5.9.2-${{ matrix.target }}.tar.gz"
+          ./scripts/verify.sh --target "${{ matrix.target }}" --archive "$archive"
+
