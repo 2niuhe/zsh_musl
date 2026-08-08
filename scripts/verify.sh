@@ -84,7 +84,7 @@ else
     darwin-arm64) echo "$FILE_OUTPUT" | grep -Eiq 'Mach-O.*(arm64|arm64e)' || die "wrong macOS arm64 architecture" ;;
   esac
   command -v otool >/dev/null 2>&1 || die "otool is required for macOS verification"
-  if otool -L "$BINARY" | tail -n +2 | grep -Ev '^\s+(/usr/lib/|/System/Library/)' | grep -q .; then
+  if otool -L "$BINARY" | tail -n +2 | grep -Ev '^[[:space:]]+(/usr/lib/|/System/Library/)' | grep -q .; then
     die "macOS binary has a non-system library dependency"
   fi
 fi
@@ -94,7 +94,7 @@ if [[ "$SKIP_RUN" != 1 ]]; then
   [[ "$VERSION_OUTPUT" == "$ZSH_VERSION" ]] || die "unexpected zsh version: $VERSION_OUTPUT"
   [[ "$("$BINARY" -f -c 'printf "%s\\n" ok')" == ok ]] || die "basic output test failed"
   [[ -z "$("$BINARY" -f -c 'x=1; test "$x" = 1')" ]] || die "test builtin behavior failed"
-  [[ "$("$BINARY" -f -c 'printf "%s\\n" one two | wc -l')" == 2 ]] || die "pipeline behavior failed"
+  [[ "$("$BINARY" -f -c 'printf "%s\\n" one two | wc -l | tr -d "[:space:]"')" == 2 ]] || die "pipeline behavior failed"
   [[ "$("$BINARY" -f -c 'printf "%s" ok > /tmp/zsh-musl-verify.$$; cat /tmp/zsh-musl-verify.$$; rm -f /tmp/zsh-musl-verify.$$')" == ok ]] || die "redirection behavior failed"
   set +e
   "$BINARY" -f -c 'exit 7'
@@ -116,4 +116,3 @@ if [[ -n "$ARCHIVE" ]]; then
 fi
 
 printf 'verified %s\n' "$TARGET"
-
