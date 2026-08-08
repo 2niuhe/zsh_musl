@@ -19,7 +19,7 @@ jobs:
           - target: linux-amd64-musl
             runner: ubuntu-24.04
           - target: darwin-amd64
-            runner: macos-13
+            runner: macos-15-intel
     runs-on: ${{ matrix.runner }}
     steps:
       - name: Check out source
@@ -40,4 +40,3 @@ jobs:
           ./scripts/package.sh --target "${{ matrix.target }}"
           archive="dist/zsh-5.9.2-${{ matrix.target }}.tar.gz"
           ./scripts/verify.sh --target "${{ matrix.target }}" --archive "$archive"
-
