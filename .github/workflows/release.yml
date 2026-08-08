@@ -50,13 +50,10 @@ jobs:
               grep -Ein 'error|fatal|undefined|failed|not found' build.log || true
               grep -Ein 'error|fatal|undefined|failed|not found' \
                 "build/${{ matrix.target }}/zsh-5.9.2/config.log" 2>/dev/null || true
-            } | tail -n 20 | tr '\n' ' ' | cut -c1-6000
+              tail -n 40 build.log || true
+            } | tail -n 60 | tr '\n' ' ' | cut -c1-6000
           )"
-          if [[ -n "$diagnostics" ]]; then
-            echo "::error::$diagnostics"
-          else
-            echo "::error::No compiler diagnostic matched; last build lines: $(tail -n 20 build.log | tr '\n' ' ' | cut -c1-6000)"
-          fi
+          echo "::error::$diagnostics"
       - name: Upload macOS build log
         if: ${{ failure() && startsWith(matrix.target, 'darwin-') }}
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.2
