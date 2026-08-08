@@ -39,8 +39,22 @@ jobs:
           if [[ "${{ matrix.target }}" == linux-* ]]; then
             ./scripts/build-linux.sh --target "${{ matrix.target }}"
           else
-            ./scripts/build-macos.sh --target "${{ matrix.target }}"
+            set -o pipefail
+            ./scripts/build-macos.sh --target "${{ matrix.target }}" 2>&1 | tee build.log
           fi
+      - name: Report macOS build failure
+        if: ${{ failure() && startsWith(matrix.target, 'darwin-') }}
+        run: |
+          tail -n 120 build.log | while IFS= read -r line; do
+            echo "::error::$line"
+          done
+      - name: Upload macOS build log
+        if: ${{ failure() && startsWith(matrix.target, 'darwin-') }}
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.2
+        with:
+          name: macos-build-log-${{ matrix.target }}
+          path: build.log
+          if-no-files-found: ignore
       - name: Verify target binary
         run: ./scripts/verify.sh --target "${{ matrix.target }}"
       - name: Package and verify archive
@@ -85,4 +99,3 @@ jobs:
               --generate-notes \
               --target "$GITHUB_SHA"
           fi
-
